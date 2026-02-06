@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authorization Callback - Social Content Manager</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .callback-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .callback-card {
+            background: var(--background-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 48px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .callback-icon {
+            font-size: 4rem;
+            margin-bottom: 24px;
+        }
+
+        .callback-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .callback-message {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .callback-code {
+            background: var(--background-dark);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            word-break: break-all;
+            margin-bottom: 24px;
+        }
+
+        .callback-link {
+            display: inline-block;
+            background: var(--gradient-primary);
+            color: white;
+            padding: 12px 32px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .callback-link:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="callback-container">
+        <div class="callback-card" id="callbackCard">
+            <div class="loading-spinner" id="spinner"></div>
+            <h1 class="callback-title" id="title">Processing Authorization...</h1>
+            <p class="callback-message" id="message">Please wait while we complete the authorization process.</p>
+            <div class="callback-code" id="codeDisplay" style="display: none;"></div>
+            <a href="index.html" class="callback-link" id="homeLink" style="display: none;">Return to Home</a>
+        </div>
+    </div>
+
+    <script>
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const error = urlParams.get('error');
+        const errorDescription = urlParams.get('error_description');
+
+        const spinner = document.getElementById('spinner');
+        const title = document.getElementById('title');
+        const message = document.getElementById('message');
+        const codeDisplay = document.getElementById('codeDisplay');
+        const homeLink = document.getElementById('homeLink');
+
+        // Remove spinner after processing
+        setTimeout(() => {
+            spinner.style.display = 'none';
+
+            if (error) {
+                // Error state
+                document.querySelector('.callback-icon')?.remove();
+                const icon = document.createElement('div');
+                icon.className = 'callback-icon';
+                icon.textContent = '❌';
+                document.querySelector('.callback-card').prepend(icon);
+
+                title.textContent = 'Authorization Failed';
+                title.style.background = 'linear-gradient(135deg, #ef4444, #f97316)';
+                title.style.webkitBackgroundClip = 'text';
+                message.textContent = errorDescription || 'An error occurred during authorization. Please try again.';
+                homeLink.style.display = 'inline-block';
+            } else if (code) {
+                // Success state
+                const icon = document.createElement('div');
+                icon.className = 'callback-icon';
+                icon.textContent = '✅';
+                spinner.replaceWith(icon);
+
+                title.textContent = 'Authorization Successful!';
+                message.textContent = 'Copy the authorization code below and paste it into the application:';
+                codeDisplay.textContent = code;
+                codeDisplay.style.display = 'block';
+                homeLink.style.display = 'inline-block';
+                homeLink.textContent = 'Done';
+            } else {
+                // No params state
+                const icon = document.createElement('div');
+                icon.className = 'callback-icon';
+                icon.textContent = '🔗';
+                spinner.replaceWith(icon);
+
+                title.textContent = 'OAuth Callback Page';
+                message.textContent = 'This page handles authorization callbacks from TikTok and Instagram. Please start the authorization process from the application.';
+                homeLink.style.display = 'inline-block';
+            }
+        }, 1000);
+    </script>
+</body>
+
+</html>
